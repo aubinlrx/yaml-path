@@ -1,0 +1,11 @@
+---
+en:
+  test: "Toto"
+  other:
+    test2: "Test2 a long and nice text that we should be able to handle
+      with some text cool
+      cool"
+    array:
+      - "toto"
+      - "tata"
+      - "pouet"
