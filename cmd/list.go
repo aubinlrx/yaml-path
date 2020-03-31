@@ -1,5 +1,5 @@
 /*
-Copyright © 2020 NAME HERE <EMAIL ADDRESS>
+Copyright © 2020 Aubin LORIEUX
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,25 +17,58 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
+	"strconv"
 
+	"github.com/aubinlrx/yaml-path/lib/filename"
+	"github.com/aubinlrx/yaml-path/lib/yamlpath"
 	"github.com/spf13/cobra"
 )
 
-// listCmd represents the list command
-var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("list called")
-	},
-}
-
 func init() {
 	rootCmd.AddCommand(listCmd)
+
+	listCmd.Flags().StringP("separator", "s", ".", "Path separator (default: .)")
+	listCmd.Flags().BoolP("line", "l", false, "Add Line to output")
+}
+
+// listCmd represents the list command
+var listCmd = &cobra.Command{
+	Use:   "list [FILE]",
+	Short: "List yaml path of the files",
+	Long:  ``,
+	RunE:  yamlList,
+}
+
+func yamlList(cmd *cobra.Command, args []string) error {
+	filename, err := filename.GetFromArgs(args)
+	if err != nil {
+		return err
+	}
+
+	dat, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+
+	sep, _ := cmd.Flags().GetString("separator")
+	line, _ := cmd.Flags().GetBool("line")
+
+	yp := yamlpath.Path{In: dat}
+	paths, err := yp.List(sep)
+	if err != nil {
+		return err
+	}
+
+	for _, p := range paths {
+		res := p.Path()
+
+		if line {
+			res += " #" + strconv.Itoa(p.Line)
+		}
+
+		fmt.Println(res)
+	}
+
+	return nil
 }
