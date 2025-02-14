@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/aubinlrx/yaml-path/lib/filename"
 	"github.com/aubinlrx/yaml-path/lib/yamlpath"
@@ -66,10 +67,20 @@ func yamlGet(cmd *cobra.Command, args []string) error {
 	}
 
 	if cmd.Flag("remove-first-key").Changed {
-		path = path[1:]
+		// path key.key_2.key_3.key_4
+		// remove the first key when flag is set
+		path = removeFirstKey(path, sep)
 	}
 
 	fmt.Println(path)
 
 	return nil
+}
+
+func removeFirstKey(path, sep string) string {
+	parts := strings.SplitN(path, sep, 2)
+	if len(parts) < 2 {
+		return ""
+	}
+	return parts[1]
 }
