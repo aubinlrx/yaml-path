@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,7 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/aubinlrx/yaml-path/lib/filename"
 	"github.com/aubinlrx/yaml-path/lib/yamlpath"
@@ -30,6 +30,7 @@ func init() {
 	getCmd.Flags().IntP("line", "l", 0, "Line number to display path for")
 	getCmd.Flags().IntP("column", "c", 0, "Column number to display path for")
 	getCmd.Flags().StringP("separator", "s", ".", "Path separator (default: .)")
+	getCmd.Flags().BoolP("remove-first-key", "r", false, "Remove the first key from the path")
 
 	getCmd.MarkFlagRequired("line")
 	getCmd.MarkFlagRequired("column")
@@ -49,7 +50,7 @@ func yamlGet(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	dat, err := ioutil.ReadFile(filename)
+	dat, err := os.ReadFile(filename)
 	if err != nil {
 		return err
 	}
@@ -62,6 +63,10 @@ func yamlGet(cmd *cobra.Command, args []string) error {
 	path, err := yp.PathAtPoint(line, col, sep)
 	if err != nil {
 		return err
+	}
+
+	if cmd.Flag("remove-first-key").Changed {
+		path = path[1:]
 	}
 
 	fmt.Println(path)
